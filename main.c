@@ -52,10 +52,13 @@ int printEmployee(int index, FILE *file)
 {
     Employee aux;
 
-    fseek(file, index, SEEK_SET);
-    fread(&aux, sizeof(Employee), 1, file);
+    fseek(file, index * sizeof(Employee), SEEK_SET);
+    if (!fread(&aux, sizeof(Employee), 1, file))
+        return 0;
 
-    printf("Pos=%i %s %s %2.f %c\n", index, aux.name, aux.department, aux.salary, aux.status);
+    printf("Pos=%i %s %s %0.2f %c\n", index, aux.name, aux.department, aux.salary, aux.status);
+
+    return 1;
 }
 
 int hash(char *key)
