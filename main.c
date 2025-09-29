@@ -29,7 +29,8 @@ int hash(char *key);
 //Para a opção 2
 void showFile(FILE *f);
 //Ler o binário e escrever na tabela
-int createTable(Table *table);
+int createTable(Table *table, FILE *file);
+void destroyTable(Table *table);
 void showHash(Table *table);
 int searchEmployee(Table *table, char *key);
 
@@ -55,6 +56,39 @@ int hash(char *key)
         value += (int)key[i];
 
     return value % TF;
+}
+
+int createTable(Table *table, FILE *file)
+{
+    for (int i = 0; i < TF; i++)                                                        //Inicializa a tabela
+        table[i].head = NULL;
+
+    Employee aux;
+    int curr = 0;
+
+    rewind(file);                                                                       //Por segurança
+    while (fread(&aux, sizeof(Employee), 1, file))
+    {
+        int index = hash(aux.department);
+
+        int count; //Itera enquanto count for menor que TF, enquanto o head aponta pra algo e enquanto ele não acha um departamento igual
+        for (count = 0; count < TF && table[index].head && strcmp(table[index].department, aux.department); count++, index = (index + 1) % TF);
+
+        if (count == TF) return 0;                                                      //Caso ele tenha chegado a TF e por que não tem como colocar.
+
+        if (!table[index].head) strcpy(table[index].department, aux.department);        //Caso estiver vazio ele copia o nome do departamento
+
+        Node *node = (Node*)malloc(sizeof(Node));
+        if (!node) return 0;
+
+        node->index = curr;
+        node->next = table[index].head;
+        table[index].head = node;
+
+        curr++;
+    }
+
+    return 1;
 }
 
 void showFile(FILE *f){
