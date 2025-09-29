@@ -48,6 +48,19 @@ int main()
     return 0;
 }
 
+int printEmployee(int index, FILE *file)
+{
+    Employee aux;
+
+    fseek(file, index * sizeof(Employee), SEEK_SET);
+    if (!fread(&aux, sizeof(Employee), 1, file))
+        return 0;
+
+    printf("Pos=%i %s %s %0.2f %c\n", index, aux.name, aux.department, aux.salary, aux.status);
+
+    return 1;
+}
+
 int hash(char *key)
 {
     int value = 0;
