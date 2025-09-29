@@ -29,7 +29,8 @@ int hash(char *key);
 //Para a opção 2
 void showFile(FILE *f);
 //Ler o binário e escrever na tabela
-int createTable(Table *table);
+int createTable(Table *table, FILE *file);
+void destroyTable(Table *table);
 void showHash(Table *table);
 int searchEmployee(Table *table, char *key);
 
