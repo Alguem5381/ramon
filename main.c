@@ -32,7 +32,7 @@ void showFile(FILE *f);
 int createTable(Table *table, FILE *file);
 void showHash(Table *table);
 int searchEmployee(Table *table, FILE *file, char *key);
-void printDepartment(Node *head, FILE *file, char *key);
+void printDepartment(Node *head, FILE *file);
 int printEmployee(int index, FILE *file);
 
 
@@ -113,7 +113,7 @@ void showFile(FILE *f){
         printf("Nome: %-13s Departamento: %-13s Salario: %6.2f Status: %c\n", e.name, e.department, e.salary, e.status);
     }
 }
-void printDepartment(Node *head, FILE *file, char *key){
+void printDepartment(Node *head, FILE *file){
     Node *curr = head;
     while (curr)
     {
