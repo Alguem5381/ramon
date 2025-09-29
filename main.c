@@ -32,17 +32,25 @@ void showFile(FILE *f);
 int createTable(Table *table, FILE *file);
 void showHash(Table *table);
 int searchEmployee(Table *table, FILE *file, char *key);
+<<<<<<< Updated upstream
+=======
+void printDepartment(Node *head, FILE *file);
+>>>>>>> Stashed changes
 int printEmployee(int index, FILE *file);
 
 
 int main()
 {
+    Table table;
     FILE *file = fopen("CADASTRO.dat", "rb");
     if(!file)
         printf("\nFile not found!");
     else{
         showFile(file);
     }
+    char *t = "Pessoal";
+    createTable(&table, file);
+    searchEmployee(&table,file, t);
     
     fclose(file);
     return 0;
@@ -61,6 +69,10 @@ int printEmployee(int index, FILE *file)
     return 1;
 }
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 int hash(char *key)
 {
     int value = 0;
@@ -111,4 +123,25 @@ void showFile(FILE *f){
         fread(&e, sizeof(Employee), 1, f);
         printf("Nome: %-13s Departamento: %-13s Salario: %6.2f Status: %c\n", e.name, e.department, e.salary, e.status);
     }
+<<<<<<< Updated upstream
+=======
+}
+
+void printDepartment(Node *head, FILE *file){
+    Node *curr = head;
+    while (curr)
+    {
+        printEmployee(head->index, file);
+        curr = curr->next;
+    }
+}
+
+int searchEmployee(Table *table, FILE *file, char *key){
+    int index = hash(key);
+    int count;
+    for (count = 0; count < TF && table[index].head && strcmp(table[index].department, key); count++, index = (index + 1) % TF);
+
+    if (count == TF) return 0;
+    printDepartment(table[index].head, file);
+>>>>>>> Stashed changes
 }
