@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAX 12
+#define TF 6
 
 typedef struct Node
 {
@@ -42,6 +44,17 @@ int main()
     
     fclose(file);
     return 0;
+}
+
+int hash(char *key)
+{
+    int value = 0;
+    int len = strlen(key);
+
+    for (int i = 0; i < len; i++)
+        value += (int)key[i];
+
+    return value % TF;
 }
 
 void showFile(FILE *f){
