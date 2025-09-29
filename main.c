@@ -61,7 +61,7 @@ int hash(char *key)
 int createTable(Table *table, FILE *file)
 {
     for (int i = 0; i < TF; i++)                                                        //Inicializa a tabela
-        table->head = NULL;
+        table[i].head = NULL;
 
     Employee aux;
     int curr = 0;
@@ -72,7 +72,7 @@ int createTable(Table *table, FILE *file)
         int index = hash(aux.department);
 
         int count; //Itera enquanto count for menor que TF, enquanto o head aponta pra algo e enquanto ele não acha um departamento igual
-        for (count = 0; count < TF && table[index].head && !strcmp(table[index].department, aux.department); count++, index = (index + 1) % TF);
+        for (count = 0; count < TF && table[index].head && strcmp(table[index].department, aux.department); count++, index = (index + 1) % TF);
 
         if (count == TF) return 0;                                                      //Caso ele tenha chegado a TF e por que não tem como colocar.
 
