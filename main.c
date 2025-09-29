@@ -30,9 +30,9 @@ int hash(char *key);
 void showFile(FILE *f);
 //Ler o binário e escrever na tabela
 int createTable(Table *table, FILE *file);
-void showHash(Table *table);
+void showHash(Table *table, FILE *file);
 int searchEmployee(Table *table, FILE *file, char *key);
-void printDepartment(Node *head, FILE *file, char *key);
+void printDepartment(Node *head, FILE *file);
 int printEmployee(int index, FILE *file);
 
 
@@ -47,6 +47,18 @@ int main()
     
     fclose(file);
     return 0;
+}
+
+void showHash(Table *table, FILE *file)
+{
+    for (int i = 0; i < TF; i++)
+    {
+        if (!table[i].head)
+            continue;
+
+        printf("Posição da tabela: %i, Departamento: %s\n", i, table[i].department);
+        printDepartment(table[i].head, file);
+    }
 }
 
 int printEmployee(int index, FILE *file)
@@ -113,7 +125,7 @@ void showFile(FILE *f){
         printf("Nome: %-13s Departamento: %-13s Salario: %6.2f Status: %c\n", e.name, e.department, e.salary, e.status);
     }
 }
-void printDepartment(Node *head, FILE *file, char *key){
+void printDepartment(Node *head, FILE *file){
     Node *curr = head;
     while (curr)
     {
