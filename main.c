@@ -118,6 +118,18 @@ int main()
     return 0;
 }
 
+void showHash(Table *table, FILE *file)
+{
+    for (int i = 0; i < TF; i++)
+    {
+        if (!table[i].head)
+            continue;
+
+        printf("Posição da tabela: %i, Departamento: %s\n", i, table[i].department);
+        printDepartment(table[i].head, file);
+    }
+}
+
 int printEmployee(int index, FILE *file)
 {
     Employee aux;
