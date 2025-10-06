@@ -26,31 +26,95 @@ typedef struct
 } Employee;
 
 int hash(char *key);
-//Para a opção 2
 void showFile(FILE *f);
-//Ler o binário e escrever na tabela
 int createTable(Table *table, FILE *file);
-void showHash(Table *table);
+void showHash(Table *table, FILE *file);
 int searchEmployee(Table *table, FILE *file, char *key);
 void printDepartment(Node *head, FILE *file);
 int printEmployee(int index, FILE *file);
-
+void freeTable(Table *table);
 
 int main()
 {
-    Table table;
-    FILE *file = fopen("CADASTRO.dat", "rb");
-    if(!file)
-        printf("\nFile not found!");
-    else{
-        showFile(file);
-    }
-    char *t = "Pessoal";
-    createTable(&table, file);
-    searchEmployee(&table,file, t);
-    
-    
-    fclose(file);
+    Table table[TF];
+    FILE *file = NULL;
+    int opcao;
+
+    do {
+        printf("\n------------MENU----------------\n");
+        printf("1 - Exibe funcionarios do arq binario CADASTRO\n");
+        printf("2 - Leitura do CADASTRO e construcao da tabela HASH por depto\n");
+        printf("3 - Exibe tudo - tabela HASH\n");
+        printf("4 - Consulta os funcionarios de um unico depto\n");
+        printf("5 - Sair\n");
+        printf("Escolha uma opcao: ");
+        scanf("%d", &opcao);
+        getchar(); // Limpa o \n do buffer
+
+        switch(opcao){
+            case 1:
+                file = fopen("CADASTRO.dat", "rb");
+                if(!file)
+                    printf("Arquivo nao encontrado!\n");
+                else{
+                    showFile(file);
+                    fclose(file);
+                }
+                break;
+
+            case 2:
+                file = fopen("CADASTRO.dat", "rb");
+                if(!file){
+                    printf("Arquivo nao encontrado!\n");
+                } else {
+                    if(createTable(table, file))
+                        printf("Tabela HASH criada com sucesso.\n");
+                    else
+                        printf("Erro ao criar a tabela HASH.\n");
+                    fclose(file);
+                }
+                break;
+
+            case 3:
+                file = fopen("CADASTRO.dat", "rb");
+                if(!file){
+                    printf("Arquivo nao encontrado!\n");
+                } else {
+                    showHash(table, file);
+                    fclose(file);
+                }
+                break;
+
+            case 4:
+            {
+                char dept[MAX];
+                printf("Digite o departamento: ");
+                fgets(dept, MAX, stdin);
+                dept[strcspn(dept, "\n")] = 0;
+
+                file = fopen("CADASTRO.dat", "rb");
+                if(!file)
+                    printf("Arquivo nao encontrado!\n");
+                else{
+                    if(!searchEmployee(table, file, dept))
+                        printf("Departamento nao encontrado.\n");
+                    fclose(file);
+                }
+                break;
+            }
+
+            case 5:
+                printf("Saindo...\n");
+                break;
+
+            default:
+                printf("Opcao invalida!\n");
+        }
+
+    } while(opcao != 6);
+
+    freeTable(table);
+
     return 0;
 }
 
@@ -62,7 +126,7 @@ int printEmployee(int index, FILE *file)
     if (!fread(&aux, sizeof(Employee), 1, file))
         return 0;
 
-    printf("Pos=%i %s %s %0.2f %c\n", index, aux.name, aux.department, aux.salary, aux.status);
+    printf("Pos=%i %s %s %.2f %c\n", index, aux.name, aux.department, aux.salary, aux.status);
 
     return 1;
 }
@@ -80,23 +144,24 @@ int hash(char *key)
 
 int createTable(Table *table, FILE *file)
 {
-    for (int i = 0; i < TF; i++)                                                        //Inicializa a tabela
+    for (int i = 0; i < TF; i++)
         table[i].head = NULL;
 
     Employee aux;
     int curr = 0;
 
-    rewind(file);                                                                       //Por segurança
+    rewind(file);
     while (fread(&aux, sizeof(Employee), 1, file))
     {
         int index = hash(aux.department);
 
-        int count; //Itera enquanto count for menor que TF, enquanto o head aponta pra algo e enquanto ele não acha um departamento igual
-        for (count = 0; count < TF && table[index].head && strcmp(table[index].department, aux.department); count++, index = (index + 1) % TF);
+        int count;
+        for (count = 0; count < TF && table[index].head && strcmp(table[index].department, aux.department) != 0; count++, index = (index + 1) % TF);
 
-        if (count == TF) return 0;                                                      //Caso ele tenha chegado a TF e por que não tem como colocar.
+        if (count == TF) return 0;
 
-        if (!table[index].head) strcpy(table[index].department, aux.department);        //Caso estiver vazio ele copia o nome do departamento
+        if (!table[index].head)
+            strncpy(table[index].department, aux.department, MAX-1), table[index].department[MAX-1] = '\0';
 
         Node *node = (Node*)malloc(sizeof(Node));
         if (!node) return 0;
@@ -113,27 +178,50 @@ int createTable(Table *table, FILE *file)
 
 void showFile(FILE *f){
     Employee e;
-    while (!feof(f)){
-        fread(&e, sizeof(Employee), 1, f);
+    rewind(f);
+    while (fread(&e, sizeof(Employee), 1, f) == 1){
         printf("Nome: %-13s Departamento: %-13s Salario: %6.2f Status: %c\n", e.name, e.department, e.salary, e.status);
     }
 }
-
 
 void printDepartment(Node *head, FILE *file){
     Node *curr = head;
     while (curr)
     {
-        printEmployee(head->index, file);
+        printEmployee(curr->index, file);
         curr = curr->next;
+    }
+}
+
+void showHash(Table *table, FILE *file){
+    for (int i = 0; i < TF; i++)
+    {
+        if (!table[i].head)
+            continue;
+
+        printf("Posicao da tabela: %i, Departamento: %s\n", i, table[i].department);
+        printDepartment(table[i].head, file);
     }
 }
 
 int searchEmployee(Table *table, FILE *file, char *key){
     int index = hash(key);
     int count;
-    for (count = 0; count < TF && table[index].head && strcmp(table[index].department, key); count++, index = (index + 1) % TF);
+    for (count = 0; count < TF && table[index].head && strcmp(table[index].department, key) != 0; count++, index = (index + 1) % TF);
 
     if (count == TF) return 0;
     printDepartment(table[index].head, file);
+    return 1;
+}
+
+void freeTable(Table *table){
+    for(int i = 0; i < TF; i++){
+        Node *curr = table[i].head;
+        while(curr){
+            Node *tmp = curr;
+            curr = curr->next;
+            free(tmp);
+        }
+        table[i].head = NULL;
+    }
 }
